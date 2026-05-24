@@ -44,12 +44,12 @@ public abstract class Cuenta {
 		return this.historial;
 	}
 	
-	public void acreditarMonto() {
-		
+	public void acreditarMonto(double monto) {
+		this.saldo += (float) monto;
 	}
 	
-	public void DebitarMonto() {
-		
+	public void DebitarMonto(double monto) {
+		this.saldo -= (float) monto;
 	}	
 	
 	public ArrayList<Inversion> getInversion(){

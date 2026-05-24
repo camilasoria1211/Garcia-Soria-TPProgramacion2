@@ -45,7 +45,7 @@ public class Usuario {
 			String cvu = cuenta.getCvu();
 			
 			StringBuilder infoCuenta = new StringBuilder("");
-			infoCuenta.append(tipo).append(alias).append("(").append(cvu).append(")");
+			infoCuenta.append(tipo).append(alias).append(" (").append(cvu).append(").");
 			listaCuentas.add(infoCuenta.toString());
 		}
 		return listaCuentas;

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
-
 public class Billetera implements IBilletera {
 	private HashMap<String, Usuario> usuarios;
 	private HashMap<Integer, Inversion> inversiones;
@@ -18,6 +16,7 @@ public class Billetera implements IBilletera {
 		this.inversiones = new HashMap<Integer, Inversion>();
 		this.historialGlobal = new ArrayList<Actividad>();
 		this.cuentasGlobales = new HashMap<String, Cuenta>();
+		this.empresas = new HashMap<String, Empresa>();
 	}
 	
 	private void aliasNoUnico(String alias) {
@@ -33,7 +32,7 @@ public class Billetera implements IBilletera {
 			String nombreContacto) {
 		if (this.empresas.containsKey(cuit)) {
 			throw new RuntimeException("Ya existe una empresa registrada con ese cuit.");
-		} else if (nombreFantasia.length() < 3 || telefono.length() != 10 || email.length() < 7) {
+		} else if (nombreFantasia == null || telefono == null || email == null) {
 			throw new RuntimeException("Algún campo es inválido");
 		}
 		Empresa empresa = new Empresa(cuit, nombreFantasia, telefono, email);
@@ -42,13 +41,19 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public void agregarPersonaAutorizada(String cuitEmpresa, String dniAutorizado) {
-		// TODO Auto-generated method stub
-
+		if (!this.empresas.containsKey(cuitEmpresa)) {
+			throw new RuntimeException("No existe ninguna empresa registrada con ese cuit.");
+		}
+		Empresa empresa = this.empresas.get(cuitEmpresa);
+		if (empresa.estaAutorizado(dniAutorizado)) {
+			throw new RuntimeException("El dni ya se encuentra autorizado.");
+		}
+		empresa.agregarAutorizado(dniAutorizado);
 	}
 
 	@Override
 	public void registrarUsuario(String dni, String nombre, String telefono, String email) {
-		if(dni.length() != 8 || nombre.length() < 3 || telefono.length() < 10 || email.length() < 7) {
+		if(dni == null || nombre == null || telefono == null || email == null) {
 			throw new RuntimeException("Algún campo es inválido");
 		}
 		if (this.usuarios.containsKey(dni)) {
@@ -79,7 +84,7 @@ public class Billetera implements IBilletera {
 		if (usuario == null) {
 			throw new RuntimeException("No existe ningún usuario con ese dni.");
 		} else if (depositoInicial < CuentaPremium.saldoMin) {
-			throw new RuntimeException("El monto inicial no es suficiente.");
+			throw new IllegalArgumentException("El monto inicial no es suficiente.");
 		}
 		CuentaPremium cuenta = new CuentaPremium(alias, depositoInicial);
 		usuario.registrarCuenta(cuenta);
@@ -126,10 +131,23 @@ public class Billetera implements IBilletera {
 		return cuenta.getSaldo();
 	}
 
+	// AGREGAR EL HISTORIAL DE ACTIVIDAD EN ESTA FUNCION //
 	@Override
 	public void realizarTransferencia(String cvuOrigen, String cvuDestino, double monto) {
-		// TODO Auto-generated method stub
-
+		if (!this.cuentasGlobales.containsKey(cvuOrigen)) {
+			throw new RuntimeException("No existe ninguna cuenta con el cvu de origen dado.");
+		} else if (!this.cuentasGlobales.containsKey(cvuDestino)) {
+			throw new RuntimeException("No existe ninguna cuenta con el cvu de destino dado.");
+		}
+		Cuenta cuentaOrigen = this.cuentasGlobales.get(cvuOrigen);
+		Cuenta cuentaDestino = this.cuentasGlobales.get(cvuDestino);
+		
+		if (cuentaOrigen.getSaldo() < monto) {
+			throw new RuntimeException("No hay suficiente saldo.");
+		} else {
+			cuentaOrigen.DebitarMonto(monto);
+			cuentaDestino.acreditarMonto(monto);			
+		}
 	}
 
 	@Override
@@ -159,8 +177,15 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public String consultarCvu(String alias) {
-		// TODO Auto-generated method stub
-		return null;
+		if (alias == null) {
+			throw new IllegalArgumentException("El alias es inválido.");
+		}
+		for (Cuenta cuenta : this.cuentasGlobales.values()) {
+			if (cuenta != null && alias.equals(cuenta.getAlias())) {
+				return cuenta.getCvu();
+			}
+		}
+		throw new IllegalArgumentException("No existe ninguna cuenta asociada a ese alias.");
 	}
 
 	@Override
@@ -183,8 +208,11 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public double obtenerTotalInvertido(String dniUsuario) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (!this.usuarios.containsKey(dniUsuario)) {
+			throw new RuntimeException("No existe ningún usuario registrado con ese dni.");
+		}
+		Usuario usuario = this.usuarios.get(dniUsuario);
+		return usuario.getTotalInvertido();
 	}
 
 	@Override

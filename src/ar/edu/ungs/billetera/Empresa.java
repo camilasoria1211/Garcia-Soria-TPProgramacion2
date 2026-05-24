@@ -20,4 +20,8 @@ public class Empresa {
 	public boolean estaAutorizado(String dni) {
 		return this.dniAutorizados.contains(dni);
 	}
+	
+	public void agregarAutorizado(String dni) {
+		dniAutorizados.add(dni);
+	}
 }
