@@ -1,0 +1,59 @@
+package ar.edu.ungs.billetera;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+public abstract class Cuenta {
+	private ArrayList<Actividad> historial;
+	private HashMap<Integer, Inversion> inversiones;
+	private String cvu;
+	private String alias;
+	private float saldo;
+	
+	public Cuenta(String alias) {
+		this.historial = new ArrayList<>();
+		this.inversiones = new HashMap<>();
+		
+		this.cvu = Utilitarios.generarSiguienteCvu();
+		this.alias = alias;
+		this.saldo = 0;
+	}
+	
+	public Cuenta(String alias, float depositoInicial) {
+		this.historial = new ArrayList<>();
+		this.inversiones = new HashMap<>();
+		
+		this.cvu = Utilitarios.generarSiguienteCvu();
+		this.alias = alias;
+		this.saldo = depositoInicial;
+	}
+	
+	public float getSaldo() {
+		return this.saldo;
+	}
+	
+	public String getAlias() {
+		return this.alias;
+	}
+	
+	public String getCvu() {
+		return this.cvu;
+	}
+	
+	public ArrayList<Actividad> getHistorial(){
+		return this.historial;
+	}
+	
+	public void acreditarMonto() {
+		
+	}
+	
+	public void DebitarMonto() {
+		
+	}	
+	
+	public ArrayList<Inversion> getInversion(){
+		
+	}
+	
+}
