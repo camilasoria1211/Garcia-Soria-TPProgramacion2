@@ -3,16 +3,21 @@ package ar.edu.ungs.billetera;
 import java.time.LocalDate;
 
 public abstract class Inversion {
+	private String dni;
 	private int plazoDias;
-	private float monto;
-	private String cuentaOrigen;
+	private double monto;
+	private String cvu;
 	private LocalDate fecha;
+	private boolean estado;
 	
-	public Inversion(int plazoDias, float monto, String cuentaOrigen){
+	public Inversion(String dni, String cvu, double monto, int plazoDias){
+		this.dni=dni;
 		this.plazoDias=plazoDias;
 		this.monto=monto;
-		this.cuentaOrigen=cuentaOrigen;
+		this.cvu=cvu;
 		this.fecha=Utilitarios.hoy();
+		this.estado=true;
+
 	}
 	
 	@Override 
@@ -20,7 +25,19 @@ public abstract class Inversion {
 	
 	public abstract double calcularRentabilidad();
 	
-	public float getMonto() {
+	public abstract double rentabilidadActual( int diasPasados);
+	
+	public abstract double totalPrecancelada( int diasPasados);
+	
+	public void precancelar() {
+		this.estado=false;
+	}
+	
+	public boolean getEstado() {
+		return this.estado;
+	}
+	
+	public double getMonto() {
 		return monto;
 	}
 	
@@ -28,8 +45,8 @@ public abstract class Inversion {
 		return plazoDias;
 	}
 	
-	public String getCuentaOrigen() {
-		return cuentaOrigen;
+	public String getCvu() {
+		return cvu;
 	}
 	
 	public LocalDate getFecha() {

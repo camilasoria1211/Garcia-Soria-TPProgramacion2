@@ -10,6 +10,8 @@ public class Billetera implements IBilletera {
 	private ArrayList<Actividad> historialGlobal;
 	private HashMap<String, Cuenta> cuentasGlobales;
 	private HashMap<String, Empresa> empresas;
+	private ArrayList <String> clientesAutorizados;
+	private int contadorInversiones;
 	
 	public Billetera() {
 		this.usuarios = new HashMap<String, Usuario>();
@@ -17,6 +19,8 @@ public class Billetera implements IBilletera {
 		this.historialGlobal = new ArrayList<Actividad>();
 		this.cuentasGlobales = new HashMap<String, Cuenta>();
 		this.empresas = new HashMap<String, Empresa>();
+		this.contadorInversiones=1;
+		this.clientesAutorizados= new ArrayList<String>();
 	}
 	
 	private void aliasNoUnico(String alias) {
@@ -45,10 +49,11 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException("No existe ninguna empresa registrada con ese cuit.");
 		}
 		Empresa empresa = this.empresas.get(cuitEmpresa);
-		if (empresa.estaAutorizado(dniAutorizado)) {
+		if (empresa.estaAutorizado(dniAutorizado) || this.clientesAutorizados.contains(dniAutorizado)) {
 			throw new RuntimeException("El dni ya se encuentra autorizado.");
 		}
 		empresa.agregarAutorizado(dniAutorizado);
+		this.clientesAutorizados.add(dniAutorizado);
 	}
 
 	@Override
@@ -152,27 +157,133 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public int realizarInversionRentaFija(String dni, String cvu, double monto, int plazoDias) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (dni==null || cvu == null || monto <= 0 || plazoDias<=0) {
+			throw new RuntimeException ("Algun campo es invalido");
+		}
+		else if (!this.usuarios.containsKey(dni)) {
+			throw new RuntimeException ("No existe ningun cliente con ese DNI");
+		}
+		Usuario usuario= this.usuarios.get(dni);
+		if (!this.cuentasGlobales.containsKey(cvu)) {
+			throw new RuntimeException ("El cvu no existe en el sistema");
+		}
+		if(!usuario.getCuenta().containsKey(cvu)) {
+			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
+		}
+		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
+		if (cuentaOperacion.getSaldo()<(float)monto) {
+			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");
+		}
+		RentaFija inversion= new RentaFija(dni, cvu, monto, plazoDias);
+		cuentaOperacion.DebitarMonto(monto);
+		usuario.actualizarTotalInvertido(monto);
+		int idInversion=this.contadorInversiones;
+		inversiones.put(idInversion, inversion);
+		cuentaOperacion.getInversiones().put(idInversion,inversion);
+		this.contadorInversiones++;
+		return idInversion;
 	}
 
 	@Override
 	public int realizarInversionDivisa(String dni, String cvu, double monto, int plazoDias, String divisa,
 			double tasa) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (dni==null || cvu==null || monto<=0 || plazoDias<=0 || divisa==null || tasa<=0) {
+			throw new RuntimeException ("Algun campo es invalido");			
+		}/*
+		if (Utilitarios.sCotizaciones.containsKey(divisa)) {
+			throw new RuntimeException ("Divisa no valida");
+		}*/
+		else if (!this.usuarios.containsKey(dni)) {
+			throw new RuntimeException ("No existe ningun cliente con ese DNI");
+		}
+		Usuario usuario= this.usuarios.get(dni);
+		if (!this.cuentasGlobales.containsKey(cvu)) {
+			throw new RuntimeException ("El cvu no existe en el sistema");
+		}
+		if(!usuario.getCuenta().containsKey(cvu)) {
+			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
+		}
+		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
+		if (cuentaOperacion.getSaldo()<(float)monto) {
+			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");
+		}
+		VincDivisa inversion= new VincDivisa (dni, cvu, monto, plazoDias, divisa, tasa);
+		cuentaOperacion.DebitarMonto(monto);
+		usuario.actualizarTotalInvertido(monto);
+		int idInversion=this.contadorInversiones;
+		inversiones.put(idInversion, inversion);
+		cuentaOperacion.getInversiones().put(idInversion,inversion);
+		this.contadorInversiones++;
+		return idInversion;
 	}
 
 	@Override
 	public int realizarInversionLiquidez(String dni, String cvu, double monto, int plazoDias) {
-		// TODO Auto-generated method stub
-		return 0;
+		if (dni==null || cvu == null || monto <= 0 || plazoDias<=0) {
+			throw new RuntimeException ("Algun campo es invalido");
+		}
+		else if (monto<20000000) {
+			throw new IllegalArgumentException ("El monto de inversion no supera el valor minimo de 20.000.000");
+		}
+		else if (!this.usuarios.containsKey(dni)) {
+			throw new RuntimeException ("No existe ningun cliente con ese DNI");
+		}
+		else if (!this.clientesAutorizados.contains(dni)) {
+			throw new RuntimeException ("El usuario no esta autorizado a realizar esta inversion");
+		}
+		Usuario usuario= this.usuarios.get(dni);
+		if (!this.cuentasGlobales.containsKey(cvu)) {
+			throw new RuntimeException ("El cvu no existe en el sistema");
+		}
+		if(!usuario.getCuenta().containsKey(cvu)) {
+			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
+		}
+		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
+		if (cuentaOperacion.getSaldo()<(float)monto) {
+			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");
+		}
+		LiquidezEmpr inversion= new LiquidezEmpr(dni, cvu, monto, plazoDias);
+		cuentaOperacion.DebitarMonto(monto);
+		usuario.actualizarTotalInvertido(monto);
+		int idInversion=this.contadorInversiones;
+		inversiones.put(idInversion, inversion);
+		cuentaOperacion.getInversiones().put(idInversion,inversion);
+
+		this.contadorInversiones++;
+				
+		return idInversion;
 	}
 
 	@Override
 	public void precancelarInversion(String dni, String cvu, int idInversion) {
-		// TODO Auto-generated method stub
-
+		if (dni==null || cvu==null) {
+			throw new RuntimeException ("Un parametro esta incompleto");			
+		}
+		if(idInversion<=0) {
+			throw new IllegalArgumentException ("El ID no es valido");
+		}
+		if (!inversiones.containsKey(idInversion)) {
+			throw new RuntimeException ("No existe la inversion en el sistema");
+		}
+		if (!this.usuarios.containsKey(dni)) {
+			throw new RuntimeException ("No existe ningun cliente con ese DNI");
+		}
+		Usuario usuario= this.usuarios.get(dni);
+		if (!this.cuentasGlobales.containsKey(cvu)) {
+			throw new RuntimeException ("El cvu no existe en el sistema");
+		}
+		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
+		if(!usuario.getCuenta().containsKey(cvu)) {
+			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
+		}
+		Inversion inversion= inversiones.get(idInversion);
+		long diasHoy = Utilitarios.hoy().toEpochDay();
+		long diasInversion = inversion.getFecha().toEpochDay();
+		int diasPasados = (int) (diasHoy - diasInversion);
+		double montoADevolver = inversion.totalPrecancelada(diasPasados);
+		cuentaOperacion.acreditarMonto(Math.round(montoADevolver * 100.0) / 100.0);
+		inversion.precancelar();
+		usuario.descontarTotalInvertido(inversion.getMonto());
 	}
 
 	@Override

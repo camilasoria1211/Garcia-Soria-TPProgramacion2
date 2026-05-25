@@ -59,7 +59,19 @@ public class Usuario {
 		return this.totalInvertido;
 	}
 	
+	public void actualizarTotalInvertido (double monto) {
+		this.totalInvertido+=(float) monto;
+	}
+	
+	public void descontarTotalInvertido (double monto) {
+		this.totalInvertido-=(float) monto;
+	}
+	
 	public String getDni() {
 		return this.dni;
+	}
+	
+	public HashMap<String, Cuenta> getCuenta(){
+		return this.cuentas;
 	}
 }

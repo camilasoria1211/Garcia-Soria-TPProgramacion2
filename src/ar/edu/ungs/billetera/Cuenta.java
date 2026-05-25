@@ -8,7 +8,7 @@ public abstract class Cuenta {
 	private HashMap<Integer, Inversion> inversiones;
 	private String cvu;
 	private String alias;
-	private float saldo;
+	private float saldo; //ANTES FLOAT
 	
 	public Cuenta(String alias) {
 		this.historial = new ArrayList<>();
@@ -45,15 +45,18 @@ public abstract class Cuenta {
 	}
 	
 	public void acreditarMonto(double monto) {
-		this.saldo += (float) monto;
+		this.saldo += monto;
 	}
 	
 	public void DebitarMonto(double monto) {
-		this.saldo -= (float) monto;
+		this.saldo -=  monto;
 	}	
 	
 	public ArrayList<Inversion> getInversion(){
 		
+	}
+	public HashMap<Integer,Inversion> getInversiones(){
+		return this.inversiones;
 	}
 	
 }
