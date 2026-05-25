@@ -281,7 +281,7 @@ public class Billetera implements IBilletera {
 		long diasInversion = inversion.getFecha().toEpochDay();
 		int diasPasados = (int) (diasHoy - diasInversion);
 		double montoADevolver = inversion.totalPrecancelada(diasPasados);
-		cuentaOperacion.acreditarMonto(Math.round(montoADevolver * 100.0) / 100.0);
+		cuentaOperacion.acreditarMonto(montoADevolver);
 		inversion.precancelar();
 		usuario.descontarTotalInvertido(inversion.getMonto());
 	}

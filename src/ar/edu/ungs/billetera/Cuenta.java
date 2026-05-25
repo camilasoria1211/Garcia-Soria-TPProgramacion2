@@ -8,7 +8,7 @@ public abstract class Cuenta {
 	private HashMap<Integer, Inversion> inversiones;
 	private String cvu;
 	private String alias;
-	private float saldo; //ANTES FLOAT
+	private double saldo; //ANTES FLOAT
 	
 	public Cuenta(String alias) {
 		this.historial = new ArrayList<>();
@@ -28,7 +28,7 @@ public abstract class Cuenta {
 		this.saldo = depositoInicial;
 	}
 	
-	public float getSaldo() {
+	public double getSaldo() {
 		return this.saldo;
 	}
 	
