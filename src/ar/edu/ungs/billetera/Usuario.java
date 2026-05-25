@@ -53,6 +53,12 @@ public class Usuario {
 	
 	public ArrayList<Actividad> getActividades(){
 		
+		ArrayList<Actividad> actividadTotal= new ArrayList<>();
+		for (Cuenta c: cuentas.values()) {
+			actividadTotal.addAll(c.getHistorial());
+		}
+		
+		return actividadTotal;
 	}
 	
 	public float getTotalInvertido() {
