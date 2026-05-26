@@ -3,6 +3,7 @@ package ar.edu.ungs.billetera;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Billetera implements IBilletera {
 	private HashMap<String, Usuario> usuarios;
@@ -412,8 +413,34 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public List<String> cuentasConMayorVolumen(int cantidadTop) {
-		// TODO Auto-generated method stub
-		return null;
+		HashMap<String,Integer> volumenCuentas= new HashMap<>();
+		for (Cuenta c: this.cuentasGlobales.values()) {
+			volumenCuentas.put(c.getCvu(), c.getHistorial().size());
+		}
+		List<Map.Entry<String, Integer>> listaAux = new ArrayList<>(volumenCuentas.entrySet());
+		List<String> mayorVolumen = new ArrayList<>();
+		for (int i = 0; i < cantidadTop; i++) {
+			String mejorCvu = quitarMaximaVol(listaAux);
+			
+			if (mejorCvu != null) {
+				mayorVolumen.add(mejorCvu);
+			}
+		}
+		return mayorVolumen;
+		}
+	private String quitarMaximaVol (List<Map.Entry<String, Integer>> lista) {
+		if (lista.isEmpty()) {
+			return null;
+		}
+		int maximo = 0;
+
+		for (int i = 1; i < lista.size(); i++) {
+			if (lista.get(i).getValue() > lista.get(maximo).getValue()) {
+				maximo = i;
+			}
+		}
+		return lista.remove(maximo).getKey();
 	}
+	
 
 }
