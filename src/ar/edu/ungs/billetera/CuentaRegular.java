@@ -7,6 +7,7 @@ public class CuentaRegular extends Cuenta {
 		super(alias);
 		this.saldoMax = 5000000;
 	}
+	@Override
 	public String toString() {
 		StringBuilder sb= new StringBuilder();
 		sb.append("Cuenta Regular");

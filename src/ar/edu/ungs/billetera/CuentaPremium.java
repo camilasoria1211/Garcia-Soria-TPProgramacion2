@@ -6,6 +6,7 @@ public class CuentaPremium extends Cuenta {
 	public CuentaPremium(String alias, double depositoInicial) {
 		super(alias, (float) depositoInicial);
 	}
+	@Override
 	public String toString() {
 		StringBuilder sb= new StringBuilder();
 		sb.append("Cuenta Premium");
