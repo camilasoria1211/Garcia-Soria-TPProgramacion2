@@ -101,9 +101,7 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public String crearCuentaCorporativa(String dniUsuario, String alias, String cuitEmpresa) {
-		if (!this.usuarios.containsKey(dniUsuario)) {
-			throw new RuntimeException("No existe ningún usuario registrado con ese dni.");
-		} else if (!this.empresas.containsKey(cuitEmpresa)) {
+		if (!this.empresas.containsKey(cuitEmpresa)) {
 			throw new RuntimeException("No existe ninguna empresa registrada con ese cuit.");
 		}
 		aliasNoUnico(alias);
@@ -111,21 +109,28 @@ public class Billetera implements IBilletera {
 		if (!empresa.estaAutorizado(dniUsuario)) {
 			throw new RuntimeException("El usuario no está autorizado a operar en nombre de esta empresa.");
 		}
-		Usuario usuario = this.usuarios.get(dniUsuario);
 		CuentaCorporativa cuenta = new CuentaCorporativa(alias);
-		
-		usuario.registrarCuenta(cuenta);
 		this.cuentasGlobales.put(cuenta.getCvu(), cuenta);
+		empresa.registrarCuenta(cuenta);
 		return cuenta.getCvu();
 	}
 
 	@Override
 	public List<String> obtenerCuentas(String dniUsuario) {
-		Usuario usuario = this.usuarios.get(dniUsuario);
-		if (usuario == null) {
+		ArrayList<String> cuentas = new ArrayList<>();
+		if (this.usuarios.containsKey(dniUsuario)) {
+			Usuario usuario = this.usuarios.get(dniUsuario);
+			cuentas.addAll(usuario.getCuentas());
+		}	
+		for (Empresa empresa : this.empresas.values()) {
+			if (empresa.estaAutorizado(dniUsuario)) {
+				cuentas.addAll(empresa.getCuentas());
+			}
+		}
+		if (cuentas.isEmpty()) {
 			throw new RuntimeException("No existe ningún usuario con ese dni.");
 		}
-		return usuario.getCuentas();
+		return cuentas;
 	}
 
 	@Override
@@ -147,7 +152,6 @@ public class Billetera implements IBilletera {
 		return dniCuenta;
 	}
 
-	// AGREGAR EL HISTORIAL DE ACTIVIDAD EN ESTA FUNCION //
 	@Override
 	public void realizarTransferencia(String cvuOrigen, String cvuDestino, double monto) {
 		if (!this.cuentasGlobales.containsKey(cvuOrigen)) {
@@ -156,27 +160,20 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException("No existe ninguna cuenta con el cvu de destino dado.");
 		}
 		Cuenta cuentaOrigen = this.cuentasGlobales.get(cvuOrigen);
-
 		String dniOrigen = obtenerDNICuenta(cvuOrigen);
-		
 		Cuenta cuentaDestino = this.cuentasGlobales.get(cvuDestino);	
-		
 		String dniDestino = obtenerDNICuenta(cvuDestino);
-		
 		if (cuentaDestino instanceof CuentaRegular) {
 			if (monto + cuentaDestino.getSaldo()>5000000) {
-				RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, 
-						dniDestino, cvuDestino, monto, "rechazada");	
+				RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, dniDestino, cvuDestino, monto, "rechazada");	
 				historialGlobal.add(nuevaActividad);
 				cuentaOrigen.getHistorial().add(nuevaActividad);
 				cuentaDestino.getHistorial().add(nuevaActividad);
 				throw new IllegalStateException ("La cuenta no puede almacenar la suma total de saldo");
 			}
 		}
-		
 		if (cuentaOrigen.getSaldo() < monto) {
-			RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, 
-					dniDestino, cvuDestino, monto, "rechazada");	
+			RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, dniDestino, cvuDestino, monto, "rechazada");	
 			historialGlobal.add(nuevaActividad);
 			cuentaOrigen.getHistorial().add(nuevaActividad);
 			cuentaDestino.getHistorial().add(nuevaActividad);

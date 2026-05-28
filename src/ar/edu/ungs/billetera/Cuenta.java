@@ -51,10 +51,7 @@ public abstract class Cuenta {
 	public void DebitarMonto(double monto) {
 		this.saldo -=  monto;
 	}	
-	/*
-	public ArrayList<Inversion> getInversion(){
-		
-	}*/
+
 	public HashMap<Integer,Inversion> getInversiones(){
 		return this.inversiones;
 	}
