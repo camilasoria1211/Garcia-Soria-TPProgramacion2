@@ -27,11 +27,11 @@ public class LiquidezEmpr extends Inversion {
 	
 	@Override
 	public void precancelar() {
-		throw new RuntimeException ("Las inversiones de Liquidez Empresarial no se precancelas");
+		throw new RuntimeException ("Las inversiones de Liquidez Empresarial no se precancelan");
 	}
 
 	@Override
 	public double totalPrecancelada(int diasPasados) {
-		throw new RuntimeException ("Las inversiones de Liquidez Empresarial no se precancelas");
+		throw new RuntimeException ("Las inversiones de Liquidez Empresarial no se precancelan");
 	}
 }

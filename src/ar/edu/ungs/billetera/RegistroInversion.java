@@ -17,7 +17,7 @@ public class RegistroInversion extends Actividad {
 				"\nOrigen: [" +getCuentaOrigen() +"] ["+ getUsuario()+"] "+
 				"\nTipo: "+ this.tipoInversion+
 				"\nMonto:" + getMonto() +
-				"\nPlazo: "+ this.plazo+
+				"\nPlazo Dias: "+ this.plazo+
 				"\nEstado: "+ getEstado();
 	}
 }

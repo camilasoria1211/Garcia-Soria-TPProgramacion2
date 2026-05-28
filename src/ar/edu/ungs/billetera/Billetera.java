@@ -11,7 +11,6 @@ public class Billetera implements IBilletera {
 	private ArrayList<Actividad> historialGlobal;
 	private HashMap<String, Cuenta> cuentasGlobales;
 	private HashMap<String, Empresa> empresas;
-	private ArrayList <String> clientesAutorizados;
 	private int contadorInversiones;
 	
 	public Billetera() {
@@ -21,7 +20,7 @@ public class Billetera implements IBilletera {
 		this.cuentasGlobales = new HashMap<String, Cuenta>();
 		this.empresas = new HashMap<String, Empresa>();
 		this.contadorInversiones=1;
-		this.clientesAutorizados= new ArrayList<String>();
+
 	}
 	
 	private void aliasNoUnico(String alias) {
@@ -50,11 +49,10 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException("No existe ninguna empresa registrada con ese cuit.");
 		}
 		Empresa empresa = this.empresas.get(cuitEmpresa);
-		if (empresa.estaAutorizado(dniAutorizado) || this.clientesAutorizados.contains(dniAutorizado)) {
+		if (empresa.estaAutorizado(dniAutorizado) ) { 
 			throw new RuntimeException("El dni ya se encuentra autorizado.");
 		}
 		empresa.agregarAutorizado(dniAutorizado);
-		this.clientesAutorizados.add(dniAutorizado);
 	}
 
 	@Override
@@ -274,9 +272,7 @@ public class Billetera implements IBilletera {
 		else if (!this.usuarios.containsKey(dni)) {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
-		else if (!this.clientesAutorizados.contains(dni)) {
-			throw new RuntimeException ("El usuario no esta autorizado a realizar esta inversion");
-		}
+
 		Usuario usuario= this.usuarios.get(dni);
 		if (!this.cuentasGlobales.containsKey(cvu)) {
 			throw new RuntimeException ("El cvu no existe en el sistema");
@@ -285,6 +281,9 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
 		}
 		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
+		if (!(cuentaOperacion instanceof CuentaCorporativa)) {
+			throw new IllegalArgumentException ("El tipo de cuenta no esta autorizado a hacer esta operacion");
+		}
 		if (cuentaOperacion.getSaldo()<(float)monto) {
 			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Inversion de Liquidez",  plazoDias);
 			historialGlobal.add(nuevaInversion);
