@@ -7,5 +7,12 @@ public class CuentaRegular extends Cuenta {
 		super(alias);
 		this.saldoMax = 5000000;
 	}
+	public String toString() {
+		StringBuilder sb= new StringBuilder();
+		sb.append("Cuenta Regular");
+		sb.append("Alias: ").append(getAlias()).append("\n");
+		sb.append("Saldo: $").append(getSaldo()).append("\n");		
+		return sb.toString();
+	}
 
 }

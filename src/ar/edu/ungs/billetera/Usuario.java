@@ -80,4 +80,22 @@ public class Usuario {
 	public HashMap<String, Cuenta> getCuenta(){
 		return this.cuentas;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Cliente: ").append(this.nombre).append(" (DNI: ").append(this.dni).append(")\n");
+		sb.append("Total Invertido: $").append(this.totalInvertido).append("\n");
+		sb.append("Cuentas asociadas:\n");
+		
+		if (this.cuentas.isEmpty()) {
+			sb.append("No hay cuentas registradas");
+		} 
+		else {
+			for (Cuenta cuenta : this.cuentas.values()) {
+				sb.append(cuenta.toString()).append("\n");
+			}
+		}
+		return sb.toString();
+	}
 }

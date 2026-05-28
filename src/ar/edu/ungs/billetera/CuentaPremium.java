@@ -6,5 +6,11 @@ public class CuentaPremium extends Cuenta {
 	public CuentaPremium(String alias, double depositoInicial) {
 		super(alias, (float) depositoInicial);
 	}
-	
+	public String toString() {
+		StringBuilder sb= new StringBuilder();
+		sb.append("Cuenta Premium");
+		sb.append("Alias: ").append(getAlias()).append("\n");
+		sb.append("Saldo: $").append(getSaldo()).append("\n");		
+		return sb.toString();
+	}
 }

@@ -438,5 +438,23 @@ public class Billetera implements IBilletera {
 		return lista.remove(maximo).getKey();
 	}
 	
+	@Override 
+	public String toString() {
+		StringBuilder sb= new StringBuilder();
+		sb.append("\n-------------------------------------------------\n");
+		sb.append("      ESTADO BILLETERA      \n");
+		sb.append("\n-------------------------------------------------\n");
+		sb.append("Cantidad usuarios registrados: "+ this.usuarios.size()+"\n");
+		sb.append("Cantidad cuentas registradas: "+ this.cuentasGlobales.size()+"\n");
+		sb.append("Actividad global total: "+ this.historialGlobal.size()+"\n");
+		sb.append("\n-------------------------------------------------\n");
+		sb.append("USUARIOS: \n");
+		for (Usuario u: this.usuarios.values()) {
+			sb.append(u.toString()).append("\n");
+			sb.append("\n-------------------------------------------------\n");
+		}
+		return sb.toString();	
+		
+	}
 
 }
