@@ -55,5 +55,4 @@ public abstract class Cuenta {
 	public HashMap<Integer,Inversion> getInversiones(){
 		return this.inversiones;
 	}
-	public abstract String toString();
 }
