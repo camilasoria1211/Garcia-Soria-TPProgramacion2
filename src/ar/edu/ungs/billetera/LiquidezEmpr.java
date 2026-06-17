@@ -2,10 +2,14 @@ package ar.edu.ungs.billetera;
 
 public class LiquidezEmpr extends Inversion {
 	private double interes;
+	private double montoMinimo=20000000;
 	
 	public LiquidezEmpr(String dni, String cvu, double monto, int plazoDias) {
 		super(dni, cvu, monto, plazoDias);
 		this.interes=0.8;
+		if (monto<montoMinimo) {
+			throw new RuntimeException ("monto no valido");
+		}
 	}
 
 	@Override

@@ -57,8 +57,16 @@ public class Usuario {
 		for (Cuenta c: cuentas.values()) {
 			actividadTotal.addAll(c.getHistorial());
 		}
-		
 		return actividadTotal;
+	}
+	
+	public ArrayList<String> actividadCuenta(String cvu){
+		ArrayList<String> lista= new ArrayList<>();
+		Cuenta c= cuentas.get(cvu);
+		for (Actividad a: c.getHistorial()) {
+			lista.add(a.toString());
+		}
+		return lista;
 	}
 	
 	public float getTotalInvertido() {
@@ -97,5 +105,27 @@ public class Usuario {
 			}
 		}
 		return sb.toString();
+	}
+	
+	public boolean perteneceCvu (String cvu) {
+		return this.cuentas.containsKey(cvu);
+	}
+	public boolean fondosSuficientes (double monto, String cvu) {
+		return cuentas.get(cvu).fondosSuficientes(monto);		
+	}
+	public void registrarActividad (String cvu, Actividad a) {
+		Cuenta c=cuentas.get(cvu);
+		c.registrarActividad(a);
+	}
+	public void nuevaInversion (Inversion i, int id, Actividad a, String cvu, double monto) {
+		actualizarTotalInvertido(monto);
+		Cuenta c= cuentas.get(cvu);
+		c.registrarActividad(a);
+		c.registrarInversion(id, i);
+		c.DebitarMonto(monto);
+	}
+	public void precancelarInversion(String cvu, int id) {
+		Cuenta c= cuentas.get(cvu);
+		c.precancelarInversion(id);
 	}
 }

@@ -196,7 +196,16 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
 		Usuario usuario= this.usuarios.get(dni);
-		if (!this.cuentasGlobales.containsKey(cvu)) {
+		if (usuario.perteneceCvu(cvu)==false) {
+			throw new RuntimeException ("la cuenta no pertenece al cliente");			
+		}
+		if (usuario.fondosSuficientes(monto, cvu)==false) {
+			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Renta Fija",  plazoDias);
+			//historialGlobal.add(nuevaInversion);
+			usuario.registrarActividad (cvu, nuevaInversion);
+			throw new RuntimeException ("no se tienen fondos suficientes");
+		}
+		/*if (!this.cuentasGlobales.containsKey(cvu)) {
 			throw new RuntimeException ("El cvu no existe en el sistema");
 		}
 		if(!usuario.getCuenta().containsKey(cvu)) {
@@ -208,16 +217,18 @@ public class Billetera implements IBilletera {
 			historialGlobal.add(nuevaInversion);
 			cuentaOperacion.getHistorial().add(nuevaInversion);
 			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");
-		}
+		}*/
 		RentaFija inversion= new RentaFija(dni, cvu, monto, plazoDias);
 		RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "aceptado","Renta Fija",  plazoDias);
-		historialGlobal.add(nuevaInversion);
-		cuentaOperacion.getHistorial().add(nuevaInversion);
+		//historialGlobal.add(nuevaInversion);
+		int idInversion=this.contadorInversiones;
+		usuario.nuevaInversion(inversion, idInversion, nuevaInversion, cvu, monto);
+		/*cuentaOperacion.getHistorial().add(nuevaInversion);
 		cuentaOperacion.DebitarMonto(monto);
 		usuario.actualizarTotalInvertido(monto);
-		int idInversion=this.contadorInversiones;
+
 		inversiones.put(idInversion, inversion);
-		cuentaOperacion.getInversiones().put(idInversion,inversion);
+		cuentaOperacion.getInversiones().put(idInversion,inversion, monto);*/
 		this.contadorInversiones++;
 		return idInversion;
 	}
@@ -235,28 +246,30 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
 		Usuario usuario= this.usuarios.get(dni);
-		if (!this.cuentasGlobales.containsKey(cvu)) {
+		/*if (!this.cuentasGlobales.containsKey(cvu)) {
 			throw new RuntimeException ("El cvu no existe en el sistema");
-		}
-		if(!usuario.getCuenta().containsKey(cvu)) {
+		}*/
+		if(usuario.perteneceCvu(cvu)==false) {
 			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
 		}
-		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
-		if (cuentaOperacion.getSaldo()<(float)monto) {
+		//Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
+		if (usuario.fondosSuficientes(monto, cvu)==false) {
 			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Inversion en Divisa",  plazoDias);
-			historialGlobal.add(nuevaInversion);
-			cuentaOperacion.getHistorial().add(nuevaInversion);
+			//historialGlobal.add(nuevaInversion);
+			usuario.registrarActividad(cvu, nuevaInversion);
 			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");
 		}
 		VincDivisa inversion= new VincDivisa (dni, cvu, monto, plazoDias, divisa, tasa);
+		int idInversion=this.contadorInversiones;
 		RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "aprobado","Renta Fija",  plazoDias);
-		historialGlobal.add(nuevaInversion);
-		cuentaOperacion.getHistorial().add(nuevaInversion);
+		//historialGlobal.add(nuevaInversion);
+		usuario.nuevaInversion(inversion, idInversion, nuevaInversion, cvu, monto);
+		usuario.registrarActividad(cvu, nuevaInversion);
+		/*cuentaOperacion.getHistorial().add(nuevaInversion);
 		cuentaOperacion.DebitarMonto(monto);
 		usuario.actualizarTotalInvertido(monto);
-		int idInversion=this.contadorInversiones;
 		inversiones.put(idInversion, inversion);
-		cuentaOperacion.getInversiones().put(idInversion,inversion);
+		cuentaOperacion.getInversiones().put(idInversion,inversion);*/
 		this.contadorInversiones++;
 		return idInversion;
 	}
@@ -266,42 +279,45 @@ public class Billetera implements IBilletera {
 		if (dni==null || cvu == null || monto <= 0 || plazoDias<=0) {
 			throw new RuntimeException ("Algun campo es invalido");
 		}
-		else if (monto<20000000) {
+		/*else if (monto<20000000) {
 			throw new IllegalArgumentException ("El monto de inversion no supera el valor minimo de 20.000.000");
-		}
+		}*/
 		else if (!this.usuarios.containsKey(dni)) {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
 
 		Usuario usuario= this.usuarios.get(dni);
-		if (!this.cuentasGlobales.containsKey(cvu)) {
+		/*if (!this.cuentasGlobales.containsKey(cvu)) {
 			throw new RuntimeException ("El cvu no existe en el sistema");
 		}
 		if(!usuario.getCuenta().containsKey(cvu)) {
 			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
-		}
+		}*/
 		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
 		if (!(cuentaOperacion instanceof CuentaCorporativa)) {
 			throw new IllegalArgumentException ("El tipo de cuenta no esta autorizado a hacer esta operacion");
 		}
-		if (cuentaOperacion.getSaldo()<(float)monto) {
+		if (usuario.fondosSuficientes(monto, cvu)==false) {
 			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Inversion de Liquidez",  plazoDias);
-			historialGlobal.add(nuevaInversion);
-			cuentaOperacion.getHistorial().add(nuevaInversion);
+			//historialGlobal.add(nuevaInversion);
+			usuario.registrarActividad(cvu, nuevaInversion);
 			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");			
 		}
 		LiquidezEmpr inversion= new LiquidezEmpr(dni, cvu, monto, plazoDias);
+		int idInversion=this.contadorInversiones;	
 		RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "aceptado","Inversion de Liquidez",  plazoDias);
-		historialGlobal.add(nuevaInversion);
+		//historialGlobal.add(nuevaInversion);
+		usuario.nuevaInversion(inversion, idInversion, nuevaInversion, cvu, monto);
+		usuario.registrarActividad(cvu, nuevaInversion);
+		/*
 		cuentaOperacion.getHistorial().add(nuevaInversion);
 		cuentaOperacion.DebitarMonto(monto);
 		usuario.actualizarTotalInvertido(monto);
-		int idInversion=this.contadorInversiones;
+
 		inversiones.put(idInversion, inversion);
-		cuentaOperacion.getInversiones().put(idInversion,inversion);
+		cuentaOperacion.getInversiones().put(idInversion,inversion);*/
 
 		this.contadorInversiones++;
-				
 		return idInversion;
 	}
 
@@ -313,20 +329,21 @@ public class Billetera implements IBilletera {
 		if(idInversion<=0) {
 			throw new IllegalArgumentException ("El ID no es valido");
 		}
-		if (!inversiones.containsKey(idInversion)) {
+	/*	if (!inversiones.containsKey(idInversion)) {
 			throw new RuntimeException ("No existe la inversion en el sistema");
-		}
+		}*/
 		if (!this.usuarios.containsKey(dni)) {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
 		Usuario usuario= this.usuarios.get(dni);
-		if (!this.cuentasGlobales.containsKey(cvu)) {
-			throw new RuntimeException ("El cvu no existe en el sistema");
-		}
+		if (usuario.perteneceCvu(cvu)==false) {
+			throw new RuntimeException ("La cuenta no pertenece al usuario");
+		}/*
 		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
 		if(!usuario.getCuenta().containsKey(cvu)) {
-			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
-		}
+			throw new RuntimeException ();
+		}*/
+		usuario.precancelarInversion(cvu, idInversion);
 		Inversion inversion= inversiones.get(idInversion);
 		long diasHoy = Utilitarios.hoy().toEpochDay();
 		long diasInversion = inversion.getFecha().toEpochDay();
@@ -355,18 +372,22 @@ public class Billetera implements IBilletera {
 		List <String> consultarHistorialGlobal= new ArrayList<String>();
 		if (this.historialGlobal ==  null) {
 			return consultarHistorialGlobal;
-		}
+		}/*
 		for (Actividad a: this.historialGlobal) {
 			if (a!=null) {
 				consultarHistorialGlobal.add(a.toString());
 			}
+		}
+		*/
+		for (Usuario u: this.usuarios.values()) {
+			consultarHistorialGlobal.add(u.getActividades().toString());
 		}
 		return consultarHistorialGlobal;
 	}
 
 	@Override
 	public List<String> consultarHistorialCuenta(String cvu) {
-		if (!cuentasGlobales.containsKey(cvu)) {
+		/*if (!cuentasGlobales.containsKey(cvu)) {
 			throw new IllegalArgumentException("No existe ninguna cuenta asociada a ese cvu");
 		}
 		List <String> historialCuenta= new ArrayList<String>();
@@ -377,8 +398,13 @@ public class Billetera implements IBilletera {
 		for (Actividad a: cuentaConsulta.getHistorial() ) {
 			historialCuenta.add(a.toString());
 		}
-		return historialCuenta;
-	
+		return historialCuenta;*/
+		for (Usuario u: this.usuarios.values()) {
+			if (u.perteneceCvu(cvu)) {
+				return u.actividadCuenta(cvu);
+			}
+		}
+		throw new RuntimeException ("no existe cvu en el sistema");
 	}
 
 	@Override

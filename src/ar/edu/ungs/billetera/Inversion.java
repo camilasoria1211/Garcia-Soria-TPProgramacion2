@@ -52,5 +52,10 @@ public abstract class Inversion {
 	public LocalDate getFecha() {
 		return fecha;
 	}
-
+	
+	public int diasPasados() {
+		long hoy= Utilitarios.hoy().toEpochDay();
+		long diasInversion= this.fecha.toEpochDay();
+		return (int)hoy - (int)diasInversion;
+	}
 }
