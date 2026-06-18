@@ -129,10 +129,10 @@ public class Billetera implements IBilletera {
 	        if (usuario.tieneCuenta(cvu)) {
 	        	duenio = usuario;
 	        }
-	        if (duenio == null) {
-	        	throw new RuntimeException("No se encontro ninguna cuenta con ese cvu.");
-	        }	        
 		}
+		if (duenio == null) {
+	        throw new RuntimeException("No se encontro ninguna cuenta con ese cvu.");
+	    }		
 		return duenio.obtenerSaldoDeCuenta(cvu);
 	}
 	
@@ -260,9 +260,10 @@ public class Billetera implements IBilletera {
 		if (alias == null) {
 			throw new IllegalArgumentException("El alias es inválido.");
 		}
-		for (Cuenta cuenta : this.cuentasGlobales.values()) {
-			if (cuenta != null && alias.equals(cuenta.getAlias())) {
-				return cuenta.getCvu();
+		for (Usuario usuario : this.usuarios.values()) {
+			String cvu = usuario.obtenerCvuPorAlias(alias);
+			if (cvu != null) {
+				return cvu;
 			}
 		}
 		throw new IllegalArgumentException("No existe ninguna cuenta asociada a ese alias.");
@@ -270,12 +271,11 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public List<String> consultarHistorialGlobal() {
-		List <String> consultarHistorialGlobal= new ArrayList<String>();
-		if (this.historialGlobal ==  null) {
-			return consultarHistorialGlobal;
-		}
-		for (Usuario u: this.usuarios.values()) {
-			consultarHistorialGlobal.add(u.getActividades().toString());
+		List <String> consultarHistorialGlobal = new ArrayList<String>();
+		for (Usuario usuario : this.usuarios.values()) {
+			for (Actividad actividad : usuario.getActividades()) {
+				consultarHistorialGlobal.add(actividad.toString());
+			}
 		}
 		return consultarHistorialGlobal;
 	}
@@ -349,13 +349,19 @@ public class Billetera implements IBilletera {
 	
 	@Override 
 	public String toString() {
+		int totalCuentas = 0;
+		int totalActividades = 0;
+		for (Usuario u : this.usuarios.values()) {
+			totalCuentas += u.getCuentas().size();
+			totalActividades += u.getActividades().size();
+		}
 		StringBuilder sb= new StringBuilder();
 		sb.append("\n-------------------------------------------------\n");
 		sb.append("      ESTADO BILLETERA      \n");
 		sb.append("\n-------------------------------------------------\n");
 		sb.append("Cantidad usuarios registrados: ").append(this.usuarios.size()).append("\n");
-		sb.append("Cantidad cuentas registradas: ").append(cuentasGlobales.size()).append("\n");
-		sb.append("Actividad global total: ").append(this.historialGlobal.size()).append("\n");
+		sb.append("Cantidad cuentas registradas: ").append(totalCuentas).append("\n");
+		sb.append("Actividad global total: ").append(totalActividades).append("\n");
 		sb.append("\n-------------------------------------------------\n");
 		sb.append("USUARIOS: \n");
 		for (Usuario u: this.usuarios.values()) {

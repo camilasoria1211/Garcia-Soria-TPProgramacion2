@@ -82,4 +82,8 @@ public abstract class Cuenta {
 	public boolean puedeRecibirMonto(double monto) {
 	    return true;
 	}
+	
+	public boolean tieneAlias(String alias) {
+        return this.alias.equals(alias);
+    }
 }

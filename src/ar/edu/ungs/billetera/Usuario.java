@@ -188,4 +188,13 @@ public class Usuario {
 		Cuenta cuenta = this.cuentas.get(cvu);
 		return cuenta.getSaldo();
 	}
+	
+	public String obtenerCvuPorAlias(String alias) {
+		for (Cuenta cuenta : this.cuentas.values())
+            if (cuenta.tieneAlias(alias)) {
+                return cuenta.getCvu();
+            }
+        }
+        return null;
+	}
 }
