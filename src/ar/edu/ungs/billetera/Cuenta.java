@@ -28,6 +28,10 @@ public abstract class Cuenta {
 		this.saldo = depositoInicial;
 	}
 	
+	public boolean aliasEnUso(String alias) {
+		return this.alias.equals(alias);
+	}
+	
 	public double getSaldo() {
 		return this.saldo;
 	}
@@ -73,5 +77,9 @@ public abstract class Cuenta {
 		acreditarMonto(i.totalPrecancelada());
 		double montoInvertido= i.getMonto();
 		return montoInvertido;
+	}
+	
+	public boolean puedeRecibirMonto(double monto) {
+	    return true;
 	}
 }

@@ -15,5 +15,10 @@ public class CuentaRegular extends Cuenta {
 		sb.append("Saldo: $").append(getSaldo()).append("\n");		
 		return sb.toString();
 	}
+	
+	@Override
+	public boolean puedeRecibirMonto(double monto) {
+	    return (monto + this.getSaldo()) <= saldoMax;
+	}
 
 }

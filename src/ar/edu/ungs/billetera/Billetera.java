@@ -8,25 +8,21 @@ import java.util.Map;
 public class Billetera implements IBilletera {
 	private HashMap<String, Usuario> usuarios;
 	private HashMap<Integer, Inversion> inversiones;
-	private ArrayList<Actividad> historialGlobal;
-	private HashMap<String, Cuenta> cuentasGlobales;
 	private HashMap<String, Empresa> empresas;
 	private int contadorInversiones;
 	
 	public Billetera() {
 		this.usuarios = new HashMap<String, Usuario>();
 		this.inversiones = new HashMap<Integer, Inversion>();
-		this.historialGlobal = new ArrayList<Actividad>();
-		this.cuentasGlobales = new HashMap<String, Cuenta>();
 		this.empresas = new HashMap<String, Empresa>();
 		this.contadorInversiones=1;
 
 	}
 	
 	private void aliasNoUnico(String alias) {
-		for (Cuenta cuenta: this.cuentasGlobales.values()) {
-			if (cuenta.getAlias().equals(alias)) {
-				throw new RuntimeException("El alias ya está registrado.");
+		for (Usuario usuario: this.usuarios.values()) {
+			if (usuario.aliasEnUso(alias)) {
+				throw new RuntimeException("El alias ya se encuentra en uso");
 			}
 		}
 	}
@@ -143,13 +139,14 @@ public class Billetera implements IBilletera {
 	private String obtenerDNICuenta(String cvu) {
 		String dniCuenta=null;
 		for (Usuario usuario : this.usuarios.values()) {
-	        if (usuario.getCuenta().containsKey(cvu)) {
+	        if (usuario.tieneCuenta(cvu)) {
 	            dniCuenta = usuario.getDni(); 	           
 	        }
 	    }
 		return dniCuenta;
 	}
 
+	/*
 	@Override
 	public void realizarTransferencia(String cvuOrigen, String cvuDestino, double monto) {
 		if (!this.cuentasGlobales.containsKey(cvuOrigen)) {
@@ -185,6 +182,27 @@ public class Billetera implements IBilletera {
 			cuentaOrigen.getHistorial().add(nuevaActividad);
 			cuentaDestino.getHistorial().add(nuevaActividad);
 		}
+	}
+	*/
+	
+	public void realizarTransferencia(String cvuOrigen, String cvuDestino, double monto) {
+		Usuario usuarioOrigen = null;
+		Usuario usuarioDestino = null;
+		for (Usuario usuario : this.usuarios.values()) {
+	        if (usuario.tieneCuenta(cvuOrigen)) {
+	            usuarioOrigen = usuario;
+	        }
+	    	if (usuarioOrigen == null) {
+	    		throw new RuntimeException("No existe ninguna cuenta con el cvu de origen dado.");
+	    	}
+	        if (usuario.tieneCuenta(cvuDestino)) {
+	            usuarioDestino = usuario;
+	        }
+	        if (usuarioDestino == null) {
+	        	throw new RuntimeException("No existe ninguna cuenta con el cvu de destino dado.");
+	        }
+	    }
+		usuarioOrigen.realizarTransferencia(cvuOrigen, usuarioDestino, cvuDestino, monto);
 	}
 
 	@Override

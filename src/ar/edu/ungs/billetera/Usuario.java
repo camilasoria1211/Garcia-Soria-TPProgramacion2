@@ -22,6 +22,15 @@ public class Usuario {
 		this.totalInvertido = 0;
 	}
 	
+	public boolean aliasEnUso(String alias) {
+		for (Cuenta cuenta: this.cuentas.values()) {
+			if (cuenta.aliasEnUso(alias)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public void registrarCuenta(Cuenta cuenta) {
 		if (cuenta == null) {
 			throw new RuntimeException("Cuenta no válida.");
@@ -85,8 +94,8 @@ public class Usuario {
 		return this.dni;
 	}
 	
-	public HashMap<String, Cuenta> getCuenta(){
-		return this.cuentas;
+	public boolean tieneCuenta(String cvu) {
+		return this.cuentas.containsKey(cvu);
 	}
 	
 	@Override
@@ -140,5 +149,38 @@ public class Usuario {
 		Cuenta c= cuentas.get(cvu);
 		double montoInvertido= c.precancelarInversion(id);
 		descontarTotalInvertido(montoInvertido);
+	}
+	
+	public boolean puedeRecibirMonto(String cvuDestino, double monto, RegistroTransferencia actividad) {
+		Cuenta cuentaDestino = this.cuentas.get(cvuDestino);
+		if (!cuentaDestino.puedeRecibirMonto(monto)) {
+			cuentaDestino.registrarActividad(actividad);
+			return false;
+		}
+		return true;
+	}
+	
+	public void acreditarACuenta(String cvuDestino, double monto, RegistroTransferencia actividad) {	
+		Cuenta cuentaDestino = this.cuentas.get(cvuDestino);
+		cuentaDestino.acreditarMonto(monto);
+		cuentaDestino.registrarActividad(actividad);
+	}
+	
+	public void realizarTransferencia(String cvuOrigen, Usuario usuarioDestino, String cvuDestino, double monto) {
+		RegistroTransferencia actividad = new RegistroTransferencia(this.dni, cvuOrigen, "No disponible", cvuDestino, monto, "rechazada");
+		Cuenta cuentaOrigen = this.cuentas.get(cvuOrigen);
+		if (!cuentaOrigen.fondosSuficientes(monto)) {
+			cuentaOrigen.registrarActividad(actividad);
+			usuarioDestino.registrarActividad(cvuDestino, actividad);
+	        throw new RuntimeException("No hay suficiente saldo.");
+	    }
+		if (!usuarioDestino.puedeRecibirMonto(cvuDestino, monto, actividad)) {
+			cuentaOrigen.registrarActividad(actividad);
+	        throw new IllegalStateException("La cuenta no puede almacenar la suma total de saldo");
+	    }
+		cuentaOrigen.DebitarMonto(monto);
+		RegistroTransferencia aprobada = new RegistroTransferencia(this.dni, cvuOrigen, "No disponible", cvuDestino, monto, "rechazada");
+		cuentaOrigen.registrarActividad(aprobada);
+		usuarioDestino.acreditarACuenta(cvuDestino, monto, aprobada);
 	}
 }
