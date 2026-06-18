@@ -25,9 +25,9 @@ public abstract class Inversion {
 	
 	public abstract double calcularRentabilidad();
 	
-	public abstract double rentabilidadActual( int diasPasados);
-	
-	public abstract double totalPrecancelada( int diasPasados);
+	public abstract double rentabilidadActual();
+
+	public abstract double totalPrecancelada();
 	
 	public void precancelar() {
 		this.estado=false;

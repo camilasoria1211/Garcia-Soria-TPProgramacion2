@@ -111,13 +111,22 @@ public class Usuario {
 		return this.cuentas.containsKey(cvu);
 	}
 	public boolean fondosSuficientes (double monto, String cvu) {
+		if (perteneceCvu(cvu)==false) {
+			throw new RuntimeException ("La cuenta no pertenece al usuario");
+		}
 		return cuentas.get(cvu).fondosSuficientes(monto);		
 	}
 	public void registrarActividad (String cvu, Actividad a) {
+		if (perteneceCvu(cvu)==false) {
+			throw new RuntimeException ("La cuenta no pertenece al usuario");
+		}
 		Cuenta c=cuentas.get(cvu);
 		c.registrarActividad(a);
 	}
 	public void nuevaInversion (Inversion i, int id, Actividad a, String cvu, double monto) {
+		if (perteneceCvu(cvu)==false) {
+			throw new RuntimeException ("La cuenta no pertenece al usuario");
+		}
 		actualizarTotalInvertido(monto);
 		Cuenta c= cuentas.get(cvu);
 		c.registrarActividad(a);
@@ -125,7 +134,11 @@ public class Usuario {
 		c.DebitarMonto(monto);
 	}
 	public void precancelarInversion(String cvu, int id) {
+		if (perteneceCvu(cvu)==false) {
+			throw new RuntimeException ("La cuenta no pertenece al usuario");
+		}
 		Cuenta c= cuentas.get(cvu);
-		c.precancelarInversion(id);
+		double montoInvertido= c.precancelarInversion(id);
+		descontarTotalInvertido(montoInvertido);
 	}
 }

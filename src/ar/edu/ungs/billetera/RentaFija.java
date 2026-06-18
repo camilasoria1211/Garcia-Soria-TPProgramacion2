@@ -26,14 +26,12 @@ public class RentaFija extends Inversion {
 		return precancelada;
 	}
 
-	@Override
-	public double rentabilidadActual(int diasPasados) {
-		return getMonto() * (interes / 365.0) * diasPasados;
+	public double rentabilidadActual() {
+		return getMonto() * (interes / 365.0) * diasPasados();
 	}
 
 	@Override
-	public double totalPrecancelada(int diasPasados) {
-		return getMonto()+(rentabilidadActual(diasPasados)/2.0);
+	public double totalPrecancelada() {
+		return getMonto()+(rentabilidadActual()/2.0);
 	}
-
 }

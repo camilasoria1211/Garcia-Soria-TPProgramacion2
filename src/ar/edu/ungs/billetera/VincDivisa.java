@@ -33,21 +33,18 @@ public class VincDivisa extends Inversion{
 	public String getDivisa() {
 		return divisa;
 	}
-
+	
 	@Override
-	public double rentabilidadActual(int diasPasados) {
+	public double totalPrecancelada() {
+		double valorActualDivisa = Utilitarios.consultarCotizacion(this.divisa);
+		 double montoHoyEnPesos= (this.getMonto() / this.cotizacionInicial) * valorActualDivisa;
+		return montoHoyEnPesos + (rentabilidadActual()/2);
+	}
+//	@Override
+	public double rentabilidadActual() {
 	    double divisasEquivalentes = this.getMonto() / this.cotizacionInicial;;
-	    double interesActual=  divisasEquivalentes * (this.tasa / 365.0) * diasPasados;
+	    double interesActual=  divisasEquivalentes * (this.tasa / 365.0) * diasPasados();
 	    double valorActualDivisa = Utilitarios.consultarCotizacion(this.divisa);
 	    return interesActual*valorActualDivisa;
 	}
-
-	@Override
-	public double totalPrecancelada(int diasPasados) {
-		 double valorActualDivisa = Utilitarios.consultarCotizacion(this.divisa);
-		 double montoHoyEnPesos= (this.getMonto() / this.cotizacionInicial) * valorActualDivisa;
-		return montoHoyEnPesos + (rentabilidadActual(diasPasados)/2);
-	}
-	
-	
 }

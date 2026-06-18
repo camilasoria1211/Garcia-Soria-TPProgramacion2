@@ -23,11 +23,6 @@ public class LiquidezEmpr extends Inversion {
 	public double calcularRentabilidad() {
 		return getMonto()+(getMonto()*(this.interes/365.0)* getPlazoDias());
 	}
-
-	@Override
-	public double rentabilidadActual(int diasPasados) {
-		return getMonto()+ getMonto()*(this.interes/365.0)* diasPasados;
-	}
 	
 	@Override
 	public void precancelar() {
@@ -35,7 +30,12 @@ public class LiquidezEmpr extends Inversion {
 	}
 
 	@Override
-	public double totalPrecancelada(int diasPasados) {
+	public double rentabilidadActual() {
+		return getMonto()+ getMonto()*(this.interes/365.0)* diasPasados();
+	}
+
+	@Override
+	public double totalPrecancelada() {
 		throw new RuntimeException ("Las inversiones de Liquidez Empresarial no se precancelan");
 	}
 }
