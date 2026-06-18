@@ -129,61 +129,17 @@ public class Billetera implements IBilletera {
 
 	@Override
 	public double obtenerSaldoDisponible(String cvu) {
-		Cuenta cuenta = this.cuentasGlobales.get(cvu);
-		if (cuenta == null) {
-			throw new RuntimeException("No se encontro ninguna cuenta con ese cvu.");
-		}
-		return cuenta.getSaldo();
-	}
-	
-	private String obtenerDNICuenta(String cvu) {
-		String dniCuenta=null;
+		Usuario duenio = null;
 		for (Usuario usuario : this.usuarios.values()) {
 	        if (usuario.tieneCuenta(cvu)) {
-	            dniCuenta = usuario.getDni(); 	           
+	        	duenio = usuario;
 	        }
-	    }
-		return dniCuenta;
+	        if (duenio == null) {
+	        	throw new RuntimeException("No se encontro ninguna cuenta con ese cvu.");
+	        }	        
+		}
+		return duenio.obtenerSaldoDeCuenta(cvu);
 	}
-
-	/*
-	@Override
-	public void realizarTransferencia(String cvuOrigen, String cvuDestino, double monto) {
-		if (!this.cuentasGlobales.containsKey(cvuOrigen)) {
-			throw new RuntimeException("No existe ninguna cuenta con el cvu de origen dado.");
-		} else if (!this.cuentasGlobales.containsKey(cvuDestino)) {
-			throw new RuntimeException("No existe ninguna cuenta con el cvu de destino dado.");
-		}
-		Cuenta cuentaOrigen = this.cuentasGlobales.get(cvuOrigen);
-		String dniOrigen = obtenerDNICuenta(cvuOrigen);
-		Cuenta cuentaDestino = this.cuentasGlobales.get(cvuDestino);	
-		String dniDestino = obtenerDNICuenta(cvuDestino);
-		if (cuentaDestino instanceof CuentaRegular) {
-			if (monto + cuentaDestino.getSaldo()>5000000) {
-				RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, dniDestino, cvuDestino, monto, "rechazada");	
-				historialGlobal.add(nuevaActividad);
-				cuentaOrigen.getHistorial().add(nuevaActividad);
-				cuentaDestino.getHistorial().add(nuevaActividad);
-				throw new IllegalStateException ("La cuenta no puede almacenar la suma total de saldo");
-			}
-		}
-		if (cuentaOrigen.getSaldo() < monto) {
-			RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, dniDestino, cvuDestino, monto, "rechazada");	
-			historialGlobal.add(nuevaActividad);
-			cuentaOrigen.getHistorial().add(nuevaActividad);
-			cuentaDestino.getHistorial().add(nuevaActividad);
-			throw new RuntimeException("No hay suficiente saldo.");
-		} else {
-			cuentaOrigen.DebitarMonto(monto);
-			cuentaDestino.acreditarMonto(monto);	
-			RegistroTransferencia nuevaActividad= new RegistroTransferencia (dniOrigen, cvuOrigen, 
-					dniDestino, cvuDestino, monto, "aceptada");	
-			historialGlobal.add(nuevaActividad);
-			cuentaOrigen.getHistorial().add(nuevaActividad);
-			cuentaDestino.getHistorial().add(nuevaActividad);
-		}
-	}
-	*/
 	
 	public void realizarTransferencia(String cvuOrigen, String cvuDestino, double monto) {
 		Usuario usuarioOrigen = null;

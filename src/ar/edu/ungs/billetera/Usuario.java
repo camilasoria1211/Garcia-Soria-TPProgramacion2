@@ -183,4 +183,9 @@ public class Usuario {
 		cuentaOrigen.registrarActividad(aprobada);
 		usuarioDestino.acreditarACuenta(cvuDestino, monto, aprobada);
 	}
+	
+	public double obtenerSaldoDeCuenta(String cvu) {
+		Cuenta cuenta = this.cuentas.get(cvu);
+		return cuenta.getSaldo();
+	}
 }
