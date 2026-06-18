@@ -72,8 +72,6 @@ public class Billetera implements IBilletera {
 		}
 		CuentaRegular cuenta = new CuentaRegular(alias);
 		usuario.registrarCuenta(cuenta);
-		this.cuentasGlobales.put(cuenta.getCvu(), cuenta);
-	
 		return cuenta.getCvu();
 	}
 
@@ -88,8 +86,6 @@ public class Billetera implements IBilletera {
 		}
 		CuentaPremium cuenta = new CuentaPremium(alias, depositoInicial);
 		usuario.registrarCuenta(cuenta);
-		this.cuentasGlobales.put(cuenta.getCvu(), cuenta);
-	
 		return cuenta.getCvu();
 	}
 
@@ -104,7 +100,6 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException("El usuario no está autorizado a operar en nombre de esta empresa.");
 		}
 		CuentaCorporativa cuenta = new CuentaCorporativa(alias);
-		this.cuentasGlobales.put(cuenta.getCvu(), cuenta);
 		empresa.registrarCuenta(cuenta);
 		return cuenta.getCvu();
 	}
