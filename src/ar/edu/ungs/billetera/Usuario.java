@@ -190,7 +190,7 @@ public class Usuario {
 	        throw new IllegalStateException("La cuenta no puede almacenar la suma total de saldo");
 	    }
 		cuentaOrigen.DebitarMonto(monto);
-		RegistroTransferencia aprobada = new RegistroTransferencia(this.dni, cvuOrigen, "No disponible", cvuDestino, monto, "rechazada");
+		RegistroTransferencia aprobada = new RegistroTransferencia(this.dni, cvuOrigen, usuarioDestino.dni, cvuDestino, monto, "aprobada");
 		cuentaOrigen.registrarActividad(aprobada);
 		usuarioDestino.acreditarACuenta(cvuDestino, monto, aprobada);
 	}

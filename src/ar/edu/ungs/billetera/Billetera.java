@@ -143,15 +143,15 @@ public class Billetera implements IBilletera {
 	        if (usuario.tieneCuenta(cvuOrigen)) {
 	            usuarioOrigen = usuario;
 	        }
-	    	if (usuarioOrigen == null) {
-	    		throw new RuntimeException("No existe ninguna cuenta con el cvu de origen dado.");
-	    	}
 	        if (usuario.tieneCuenta(cvuDestino)) {
 	            usuarioDestino = usuario;
 	        }
-	        if (usuarioDestino == null) {
-	        	throw new RuntimeException("No existe ninguna cuenta con el cvu de destino dado.");
-	        }
+	    }
+		if (usuarioOrigen == null) {
+	    		throw new RuntimeException("No existe ninguna cuenta con el cvu de origen dado.");
+	    	}	        
+	    if (usuarioDestino == null) {
+	        	throw new IllegalStateException("No existe ninguna cuenta con el cvu de destino dado.");
 	    }
 		usuarioOrigen.realizarTransferencia(cvuOrigen, usuarioDestino, cvuDestino, monto);
 	}
