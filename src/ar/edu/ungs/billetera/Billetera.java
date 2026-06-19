@@ -165,7 +165,7 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
 		Usuario usuario = this.usuarios.get(dni);
-		int idInversion=this.contadorInversiones;		
+		int idInversion = this.contadorInversiones;		
 		usuario.realizarInversionRentaFija(cvu, monto, plazoDias, idInversion);
 		this.contadorInversiones++;
 		return idInversion;
@@ -176,24 +176,12 @@ public class Billetera implements IBilletera {
 		if (dni==null || cvu==null || monto<=0 || plazoDias<=0 || divisa==null || tasa<=0) {
 			throw new RuntimeException ("Algun campo es invalido");			
 		}
-		else if (!this.usuarios.containsKey(dni)) {
+		if (!this.usuarios.containsKey(dni)) {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
-		Usuario usuario= this.usuarios.get(dni);
-
-		if(usuario.perteneceCvu(cvu)==false) {
-			throw new RuntimeException ("Esa cuenta no corresponde al usuario");
-		}
-		if (usuario.fondosSuficientes(monto, cvu)==false) {
-			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Inversion en Divisa",  plazoDias);
-			usuario.registrarActividad(cvu, nuevaInversion);
-			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");
-		}
-		VincDivisa inversion= new VincDivisa (dni, cvu, monto, plazoDias, divisa, tasa);
-		int idInversion=this.contadorInversiones;
-		RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "aprobado","Renta Fija",  plazoDias);
-		usuario.nuevaInversion(inversion, idInversion, nuevaInversion, cvu, monto);
-		usuario.registrarActividad(cvu, nuevaInversion);
+		Usuario usuario = this.usuarios.get(dni);
+		int idInversion = this.contadorInversiones;
+		usuario.realizarInversionDivisa(dni, cvu, monto, plazoDias, divisa, tasa, idInversion);
 		this.contadorInversiones++;
 		return idInversion;
 	}
@@ -203,25 +191,12 @@ public class Billetera implements IBilletera {
 		if (dni==null || cvu == null || monto <= 0 || plazoDias<=0) {
 			throw new RuntimeException ("Algun campo es invalido");
 		}
-		else if (!this.usuarios.containsKey(dni)) {
+		if (!this.usuarios.containsKey(dni)) {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
-
-		Usuario usuario= this.usuarios.get(dni);
-		Cuenta cuentaOperacion= this.cuentasGlobales.get(cvu);
-		if (!(cuentaOperacion instanceof CuentaCorporativa)) {
-			throw new IllegalArgumentException ("El tipo de cuenta no esta autorizado a hacer esta operacion");
-		}
-		if (usuario.fondosSuficientes(monto, cvu)==false) {
-			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Inversion de Liquidez",  plazoDias);
-			usuario.registrarActividad(cvu, nuevaInversion);
-			throw new RuntimeException ("La cuenta no tiene saldo suficiente para realizar esta inversion");			
-		}
-		LiquidezEmpr inversion= new LiquidezEmpr(dni, cvu, monto, plazoDias);
-		int idInversion=this.contadorInversiones;	
-		RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "aceptado","Inversion de Liquidez",  plazoDias);
-		usuario.nuevaInversion(inversion, idInversion, nuevaInversion, cvu, monto);
-		usuario.registrarActividad(cvu, nuevaInversion);
+		Usuario usuario = this.usuarios.get(dni);
+		int idInversion = this.contadorInversiones;
+		usuario.realizarInversionLiquidez(cvu, monto, plazoDias, idInversion);
 		this.contadorInversiones++;
 		return idInversion;
 	}
@@ -321,7 +296,8 @@ public class Billetera implements IBilletera {
 			}
 		}
 		return mayorVolumen;
-		}
+	}
+	
 	private String quitarMaximaVol (List<Map.Entry<String, Integer>> lista) {
 		if (lista.isEmpty()) {
 			return null;

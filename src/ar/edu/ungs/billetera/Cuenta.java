@@ -63,23 +63,27 @@ public abstract class Cuenta {
 	public HashMap<Integer,Inversion> getInversiones(){
 		return this.inversiones;
 	}
+	
 	public boolean fondosSuficientes (double monto) {
 		return this.saldo>=monto;
 	}
+	
 	public void registrarActividad (Actividad a) {
 		this.historial.add(a);
 	}
+	
 	public void registrarInversion(int id, Inversion i) {
 		this.inversiones.put (id, i);
 	}
+	
 	public double precancelarInversion (int id) {
 		if (!this.inversiones.containsKey(id)) {
 	        throw new RuntimeException("La inversión no existe en esta cuenta");
 	    }
-		Inversion i= inversiones.get(id);
+		Inversion i = inversiones.get(id);
 		i.precancelar();
 		acreditarMonto(i.totalPrecancelada());
-		double montoInvertido= i.getMonto();
+		double montoInvertido = i.getMonto();
 		return montoInvertido;
 	}
 	

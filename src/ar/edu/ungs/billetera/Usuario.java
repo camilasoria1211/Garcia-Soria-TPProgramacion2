@@ -226,7 +226,44 @@ public class Usuario {
 		cuenta.registrarActividad(inversionAceptada);
 		cuenta.registrarInversion(idInversion, inversion);
 		actualizarTotalInvertido(monto);
-
-      }
-
+    }
+	
+	public void realizarInversionDivisa(String dni, String cvu, double monto, int plazoDias, String divisa, double tasa, int idInversion) {
+		Cuenta cuenta = this.cuentas.get(cvu);
+		if (cuenta == null) {
+			throw new RuntimeException("la cuenta no pertenece al cliente");			
+		}
+		if (!cuenta.fondosSuficientes(monto)) {
+			RegistroInversion inversionRechazada = new RegistroInversion(this.dni, cvu, monto, "rechazada", "Vinculada a divisa", plazoDias);
+			cuenta.registrarActividad(inversionRechazada);
+			throw new RuntimeException("no se tienen fondos suficientes");
+		}
+		VincDivisa inversion = new VincDivisa(this.dni, cvu, monto, plazoDias, divisa, tasa);
+		RegistroInversion inversionAceptada = new RegistroInversion(this.dni, cvu, monto, "aceptada", "Vinculada a divisa", plazoDias);
+		cuenta.DebitarMonto(monto);
+		cuenta.registrarActividad(inversionAceptada);
+		cuenta.registrarInversion(idInversion, inversion);
+		actualizarTotalInvertido(monto);
+	}
+	
+	public void realizarInversionLiquidez(String cvu, double monto, int plazoDias, int idInversion) {
+		Cuenta cuenta = this.cuentas.get(cvu);
+		if (cuenta == null) {
+			throw new RuntimeException("la cuenta no pertenece al cliente");			
+		}
+		if (!(cuenta instanceof CuentaCorporativa)) {
+			throw new IllegalArgumentException("El tipo de cuenta no esta autorizado a hacer esta operacion");
+		}
+		if (!cuenta.fondosSuficientes(monto)) {
+			RegistroInversion inversionRechazada = new RegistroInversion(this.dni, cvu, monto, "rechazada", "Inversion de Liquidez", plazoDias);
+			cuenta.registrarActividad(inversionRechazada);
+			throw new RuntimeException("no se tienen fondos suficientes");
+		}
+		LiquidezEmpr inversion = new LiquidezEmpr(this.dni, cvu, monto, plazoDias);
+		RegistroInversion inversionAceptada = new RegistroInversion(this.dni, cvu, monto, "aceptada", "Inversion de Liquidez", plazoDias);
+		cuenta.DebitarMonto(monto);
+		cuenta.registrarActividad(inversionAceptada);
+		cuenta.registrarInversion(idInversion, inversion);
+		actualizarTotalInvertido(monto);
+	}
 }
