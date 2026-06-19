@@ -48,6 +48,10 @@ public abstract class Cuenta {
 		return this.historial;
 	}
 	
+	public int cantidadHistorial() {
+		return this.historial.size();
+	}
+	
 	public void acreditarMonto(double monto) {
 		this.saldo += monto;
 	}

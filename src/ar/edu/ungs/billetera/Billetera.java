@@ -308,8 +308,8 @@ public class Billetera implements IBilletera {
 	@Override
 	public List<String> cuentasConMayorVolumen(int cantidadTop) {
 		HashMap<String,Integer> volumenCuentas= new HashMap<>();
-		for (Cuenta c: this.cuentasGlobales.values()) {
-			volumenCuentas.put(c.getCvu(), c.getHistorial().size());
+		for (Usuario u: this.usuarios.values()) {
+			volumenCuentas.putAll(u.totalActividadPorCuenta());;
 		}
 		List<Map.Entry<String, Integer>> listaAux = new ArrayList<>(volumenCuentas.entrySet());
 		List<String> mayorVolumen = new ArrayList<>();

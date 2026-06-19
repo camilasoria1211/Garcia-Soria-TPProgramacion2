@@ -77,6 +77,13 @@ public class Usuario {
 		}
 		return lista;
 	}
+	public HashMap<String, Integer> totalActividadPorCuenta (){
+		HashMap<String, Integer> actividadPorCuenta = new HashMap<>();
+		for (Cuenta c: this.cuentas.values()) {
+			actividadPorCuenta.put(c.getCvu(), c.cantidadHistorial());
+		}
+		return actividadPorCuenta;
+	}
 	
 	public float getTotalInvertido() {
 		return this.totalInvertido;
@@ -198,6 +205,7 @@ public class Usuario {
             if (cuenta.tieneAlias(alias)) {
                 return cuenta.getCvu();
             }
+
 		}
         return null;
 	}
@@ -218,6 +226,7 @@ public class Usuario {
 		cuenta.registrarActividad(inversionAceptada);
 		cuenta.registrarInversion(idInversion, inversion);
 		actualizarTotalInvertido(monto);
-	}
+
+      }
 
 }
