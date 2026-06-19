@@ -161,29 +161,18 @@ public class Billetera implements IBilletera {
 		if (dni==null || cvu == null || monto <= 0 || plazoDias<=0) {
 			throw new RuntimeException ("Algun campo es invalido");
 		}
-		else if (!this.usuarios.containsKey(dni)) {
+		if (!this.usuarios.containsKey(dni)) {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
-		Usuario usuario= this.usuarios.get(dni);
-		if (usuario.perteneceCvu(cvu)==false) {
-			throw new RuntimeException ("la cuenta no pertenece al cliente");			
-		}
-		if (usuario.fondosSuficientes(monto, cvu)==false) {
-			RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "rechazado","Renta Fija",  plazoDias);
-			usuario.registrarActividad (cvu, nuevaInversion);
-			throw new RuntimeException ("no se tienen fondos suficientes");
-		}
-		RentaFija inversion= new RentaFija(dni, cvu, monto, plazoDias);
-		RegistroInversion nuevaInversion = new RegistroInversion (dni, cvu, monto, "aceptado","Renta Fija",  plazoDias);
-		int idInversion=this.contadorInversiones;
-		usuario.nuevaInversion(inversion, idInversion, nuevaInversion, cvu, monto);
+		Usuario usuario = this.usuarios.get(dni);
+		int idInversion=this.contadorInversiones;		
+		usuario.realizarInversionRentaFija(cvu, monto, plazoDias, idInversion);
 		this.contadorInversiones++;
 		return idInversion;
 	}
 
 	@Override
-	public int realizarInversionDivisa(String dni, String cvu, double monto, int plazoDias, String divisa,
-			double tasa) {
+	public int realizarInversionDivisa(String dni, String cvu, double monto, int plazoDias, String divisa, double tasa) {
 		if (dni==null || cvu==null || monto<=0 || plazoDias<=0 || divisa==null || tasa<=0) {
 			throw new RuntimeException ("Algun campo es invalido");			
 		}

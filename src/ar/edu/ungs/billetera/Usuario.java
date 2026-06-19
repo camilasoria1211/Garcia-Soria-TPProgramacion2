@@ -119,12 +119,14 @@ public class Usuario {
 	public boolean perteneceCvu (String cvu) {
 		return this.cuentas.containsKey(cvu);
 	}
+	
 	public boolean fondosSuficientes (double monto, String cvu) {
-		if (perteneceCvu(cvu)==false) {
+		if (perteneceCvu (cvu) ==false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
 		}
 		return cuentas.get(cvu).fondosSuficientes(monto);		
 	}
+	
 	public void registrarActividad (String cvu, Actividad a) {
 		if (perteneceCvu(cvu)==false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
@@ -132,6 +134,7 @@ public class Usuario {
 		Cuenta c=cuentas.get(cvu);
 		c.registrarActividad(a);
 	}
+	
 	public void nuevaInversion (Inversion i, int id, Actividad a, String cvu, double monto) {
 		if (perteneceCvu(cvu)==false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
@@ -142,6 +145,7 @@ public class Usuario {
 		c.registrarInversion(id, i);
 		c.DebitarMonto(monto);
 	}
+	
 	public void precancelarInversion(String cvu, int id) {
 		if (perteneceCvu(cvu)==false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
@@ -190,11 +194,30 @@ public class Usuario {
 	}
 	
 	public String obtenerCvuPorAlias(String alias) {
-		for (Cuenta cuenta : this.cuentas.values())
+		for (Cuenta cuenta : this.cuentas.values()) {
             if (cuenta.tieneAlias(alias)) {
                 return cuenta.getCvu();
             }
-        }
+		}
         return null;
 	}
+
+	public void realizarInversionRentaFija(String cvu, double monto, int plazoDias, int idInversion) {
+		Cuenta cuenta = this.cuentas.get(cvu);
+		if (cuenta == null) {
+			throw new RuntimeException("la cuenta no pertenece al cliente");			
+		}
+		if (!cuenta.fondosSuficientes(monto)) {
+			RegistroInversion inversionRechazada = new RegistroInversion(this.dni, cvu, monto, "rechazada", "Renta Fija", plazoDias);
+			cuenta.registrarActividad(inversionRechazada);
+			throw new RuntimeException("no se tienen fondos suficientes");
+		}
+		RentaFija inversion = new RentaFija(this.dni, cvu, monto, plazoDias);
+		RegistroInversion inversionAceptada = new RegistroInversion(this.dni, cvu, monto, "aceptada", "Renta Fija", plazoDias);
+		cuenta.DebitarMonto(monto);
+		cuenta.registrarActividad(inversionAceptada);
+		cuenta.registrarInversion(idInversion, inversion);
+		actualizarTotalInvertido(monto);
+	}
+
 }
