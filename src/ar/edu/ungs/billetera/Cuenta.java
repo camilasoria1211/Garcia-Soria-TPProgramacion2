@@ -44,8 +44,18 @@ public abstract class Cuenta {
 		return this.cvu;
 	}
 	
-	public ArrayList<Actividad> getHistorial(){
-		return this.historial;
+	public void listarActividades(ArrayList<Actividad> lista) {
+		if (lista != null) {
+			lista.addAll(this.historial);
+		}
+	}
+	
+	public ArrayList<String> listarComoString() {
+		ArrayList<String> listaString = new ArrayList<>();
+		for (Actividad a : this.historial) {
+			listaString.add(a.toString());
+		}
+		return listaString;
 	}
 	
 	public int cantidadHistorial() {
@@ -56,7 +66,7 @@ public abstract class Cuenta {
 		this.saldo += monto;
 	}
 	
-	public void DebitarMonto(double monto) {
+	public void debitarMonto(double monto) {
 		this.saldo -=  monto;
 	}	
 
@@ -73,7 +83,7 @@ public abstract class Cuenta {
 	}
 	
 	public void registrarInversion(int id, Inversion i) {
-		this.inversiones.put (id, i);
+		this.inversiones.put(id, i);
 	}
 	
 	public double precancelarInversion (int id) {
@@ -89,9 +99,5 @@ public abstract class Cuenta {
 	
 	public boolean puedeRecibirMonto(double monto) {
 	    return true;
-	}
-	
-	public boolean tieneAlias(String alias) {
-        return this.alias.equals(alias);
 	}
 }

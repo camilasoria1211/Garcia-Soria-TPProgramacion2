@@ -7,13 +7,11 @@ import java.util.Map;
 
 public class Billetera implements IBilletera {
 	private HashMap<String, Usuario> usuarios;
-	private HashMap<Integer, Inversion> inversiones;
 	private HashMap<String, Empresa> empresas;
 	private int contadorInversiones;
 	
 	public Billetera() {
 		this.usuarios = new HashMap<String, Usuario>();
-		this.inversiones = new HashMap<Integer, Inversion>();
 		this.empresas = new HashMap<String, Empresa>();
 		this.contadorInversiones=1;
 
@@ -149,7 +147,7 @@ public class Billetera implements IBilletera {
 	    }
 		if (usuarioOrigen == null) {
 	    		throw new RuntimeException("No existe ninguna cuenta con el cvu de origen dado.");
-	    	}	        
+	    }	        
 	    if (usuarioDestino == null) {
 	        	throw new IllegalStateException("No existe ninguna cuenta con el cvu de destino dado.");
 	    }
@@ -181,7 +179,7 @@ public class Billetera implements IBilletera {
 		}
 		Usuario usuario = this.usuarios.get(dni);
 		int idInversion = this.contadorInversiones;
-		usuario.realizarInversionDivisa(dni, cvu, monto, plazoDias, divisa, tasa, idInversion);
+		usuario.realizarInversionDivisa(cvu, monto, plazoDias, divisa, tasa, idInversion);
 		this.contadorInversiones++;
 		return idInversion;
 	}
@@ -213,7 +211,7 @@ public class Billetera implements IBilletera {
 			throw new RuntimeException ("No existe ningun cliente con ese DNI");
 		}
 		Usuario usuario= this.usuarios.get(dni);
-		if (usuario.perteneceCvu(cvu)==false) {
+		if (usuario.tieneCuenta(cvu)==false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
 		}
 		usuario.precancelarInversion(cvu, idInversion);
@@ -247,7 +245,7 @@ public class Billetera implements IBilletera {
 	@Override
 	public List<String> consultarHistorialCuenta(String cvu) {
 		for (Usuario u: this.usuarios.values()) {
-			if (u.perteneceCvu(cvu)) {
+			if (u.tieneCuenta(cvu)) {
 				return u.actividadCuenta(cvu);
 			}
 		}

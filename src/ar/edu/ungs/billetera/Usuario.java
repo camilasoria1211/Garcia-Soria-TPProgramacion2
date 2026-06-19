@@ -60,23 +60,22 @@ public class Usuario {
 		return listaCuentas;
 	}
 	
-	public ArrayList<Actividad> getActividades(){
-		
+	public ArrayList<Actividad> getActividades(){	
 		ArrayList<Actividad> actividadTotal= new ArrayList<>();
-		for (Cuenta c: cuentas.values()) {
-			actividadTotal.addAll(c.getHistorial());
+		for (Cuenta c : cuentas.values()) {
+			c.listarActividades(actividadTotal);
 		}
 		return actividadTotal;
 	}
 	
 	public ArrayList<String> actividadCuenta(String cvu){
-		ArrayList<String> lista= new ArrayList<>();
-		Cuenta c= cuentas.get(cvu);
-		for (Actividad a: c.getHistorial()) {
-			lista.add(a.toString());
+		Cuenta c = cuentas.get(cvu);
+		if (c == null) {
+			throw new RuntimeException("no existe ese cvu en el sistema");
 		}
-		return lista;
+		return c.listarComoString();
 	}
+	
 	public HashMap<String, Integer> totalActividadPorCuenta (){
 		HashMap<String, Integer> actividadPorCuenta = new HashMap<>();
 		for (Cuenta c: this.cuentas.values()) {
@@ -123,38 +122,16 @@ public class Usuario {
 		return sb.toString();
 	}
 	
-	public boolean perteneceCvu (String cvu) {
-		return this.cuentas.containsKey(cvu);
-	}
-	
-	public boolean fondosSuficientes (double monto, String cvu) {
-		if (perteneceCvu (cvu) ==false) {
-			throw new RuntimeException ("La cuenta no pertenece al usuario");
-		}
-		return cuentas.get(cvu).fondosSuficientes(monto);		
-	}
-	
 	public void registrarActividad (String cvu, Actividad a) {
-		if (perteneceCvu(cvu)==false) {
+		if (tieneCuenta(cvu) == false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
 		}
-		Cuenta c=cuentas.get(cvu);
+		Cuenta c = cuentas.get(cvu);
 		c.registrarActividad(a);
-	}
-	
-	public void nuevaInversion (Inversion i, int id, Actividad a, String cvu, double monto) {
-		if (perteneceCvu(cvu)==false) {
-			throw new RuntimeException ("La cuenta no pertenece al usuario");
-		}
-		actualizarTotalInvertido(monto);
-		Cuenta c= cuentas.get(cvu);
-		c.registrarActividad(a);
-		c.registrarInversion(id, i);
-		c.DebitarMonto(monto);
 	}
 	
 	public void precancelarInversion(String cvu, int id) {
-		if (perteneceCvu(cvu)==false) {
+		if (tieneCuenta(cvu) == false) {
 			throw new RuntimeException ("La cuenta no pertenece al usuario");
 		}
 		Cuenta c= cuentas.get(cvu);
@@ -189,7 +166,7 @@ public class Usuario {
 			cuentaOrigen.registrarActividad(actividad);
 	        throw new IllegalStateException("La cuenta no puede almacenar la suma total de saldo");
 	    }
-		cuentaOrigen.DebitarMonto(monto);
+		cuentaOrigen.debitarMonto(monto);
 		RegistroTransferencia aprobada = new RegistroTransferencia(this.dni, cvuOrigen, usuarioDestino.dni, cvuDestino, monto, "aprobada");
 		cuentaOrigen.registrarActividad(aprobada);
 		usuarioDestino.acreditarACuenta(cvuDestino, monto, aprobada);
@@ -202,10 +179,9 @@ public class Usuario {
 	
 	public String obtenerCvuPorAlias(String alias) {
 		for (Cuenta cuenta : this.cuentas.values()) {
-            if (cuenta.tieneAlias(alias)) {
+            if (cuenta.aliasEnUso(alias)) {
                 return cuenta.getCvu();
             }
-
 		}
         return null;
 	}
@@ -222,13 +198,13 @@ public class Usuario {
 		}
 		RentaFija inversion = new RentaFija(this.dni, cvu, monto, plazoDias);
 		RegistroInversion inversionAceptada = new RegistroInversion(this.dni, cvu, monto, "aceptada", "Renta Fija", plazoDias);
-		cuenta.DebitarMonto(monto);
+		cuenta.debitarMonto(monto);
 		cuenta.registrarActividad(inversionAceptada);
 		cuenta.registrarInversion(idInversion, inversion);
 		actualizarTotalInvertido(monto);
     }
 	
-	public void realizarInversionDivisa(String dni, String cvu, double monto, int plazoDias, String divisa, double tasa, int idInversion) {
+	public void realizarInversionDivisa(String cvu, double monto, int plazoDias, String divisa, double tasa, int idInversion) {
 		Cuenta cuenta = this.cuentas.get(cvu);
 		if (cuenta == null) {
 			throw new RuntimeException("la cuenta no pertenece al cliente");			
@@ -240,7 +216,7 @@ public class Usuario {
 		}
 		VincDivisa inversion = new VincDivisa(this.dni, cvu, monto, plazoDias, divisa, tasa);
 		RegistroInversion inversionAceptada = new RegistroInversion(this.dni, cvu, monto, "aceptada", "Vinculada a divisa", plazoDias);
-		cuenta.DebitarMonto(monto);
+		cuenta.debitarMonto(monto);
 		cuenta.registrarActividad(inversionAceptada);
 		cuenta.registrarInversion(idInversion, inversion);
 		actualizarTotalInvertido(monto);
@@ -261,7 +237,7 @@ public class Usuario {
 		}
 		LiquidezEmpr inversion = new LiquidezEmpr(this.dni, cvu, monto, plazoDias);
 		RegistroInversion inversionAceptada = new RegistroInversion(this.dni, cvu, monto, "aceptada", "Inversion de Liquidez", plazoDias);
-		cuenta.DebitarMonto(monto);
+		cuenta.debitarMonto(monto);
 		cuenta.registrarActividad(inversionAceptada);
 		cuenta.registrarInversion(idInversion, inversion);
 		actualizarTotalInvertido(monto);
